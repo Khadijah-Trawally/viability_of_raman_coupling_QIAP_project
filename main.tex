@@ -1,0 +1,328 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{amssymb}  % For additional mathematical symbols
+\usepackage{graphicx}
+\usepackage{physics}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{subcaption}
+
+% Define colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% Define Python style
+\lstdefinestyle{python}{
+    language=Python,
+    basicstyle=\footnotesize\ttfamily,
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    numbers=left,
+    numbersep=5pt,
+    backgroundcolor=\color{backcolour},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    breaklines=true,
+    tabsize=2,
+    emph={class, def, if, else, for, while, import, from, print},
+    emphstyle=\color{codepurple},
+}
+
+
+
+\title{Viability of Raman coupling}
+\author{Khadijatou Trawally}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+ This report evaluates the viability of Raman coupling in an open Markovian quantum system for effective qubit operations. We analyze a system where two quasi-ground states \(|0\rangle\) and \(|1\rangle\) are coupled via an excited state \(|e\rangle\) using Raman transitions. This simulation focuses on how different decay rates \(\gamma\) affect the decoherence effect of the excited state \(|e\rangle\) decaying into the ground states \((|0\rangle\) \& \(|1\rangle\)) and a dark state \(|d\rangle\).  Theoretical analysis and simulation results are shown to demonstrate the conditions under which optimal Rabi oscillations can be achieved without excessive laser pumping.
+
+\end{abstract}
+\section{Introduction}
+
+
+Quantum systems, particularly those involving interactions between quantum states, can be modeled and analyzed using various numerical methods. Raman coupling, a fundamental process in quantum mechanics, has multiple applications in quantum information processing and control. It involves the interaction of light with matter, allowing for manipulating quantum states. The two-level system involving direct transitions between ground and excited states often suffers from rapid decoherence, limiting the number of possible qubit operations. In contrast, Raman coupling uses an intermediate excited state \(|e\rangle\) that is strongly coupled to two long-lived quasi-ground states \(|0\rangle\) and \(|1\rangle\), which do not have a direct dipole transition. This is achieved through an intermediate excited state  \(|e\rangle\) which is strongly optically coupled to both lasers.  By carefully selecting the detunings and frequencies of two lasers, a complete transition from \(|0\rangle\) to \(|1\rangle\) can be realized without significantly populating the short-lived state \(|e\rangle\) \cite{SteckQuantumAtomOptics}. This process ensures that the rapid decay of the intermediate state does not impact the overall transition thus mitigating decoherence effects and enabling prolonged qubit operations
+
+This study investigates the construction and simulation of Hamiltonians for a quantum system influenced by Raman coupling. It focuses on the Hamiltonian description and the master equation governing the system's time evolution to assess the viability of this approach. The Quantum Toolbox in Python (QuTiP), an open-source library for simulating the dynamics of open quantum systems, is used for the implementation \cite{Johansson2013}. The results demonstrate the impact of decay rates on coherent population transfer.
+
+
+\section{Theoretical Background}
+Raman transitions are second-order processes where an atom or molecule is excited to a virtual state before decaying to a final state. These transitions can be used to create entangled states and perform quantum gate operations.
+The atomic energy level structure in the context of a three-level quantum system considers an excited state $|e\rangle$ that couples to two ground states $|0\rangle$ and $|1\rangle$ by two optical lasers as shown in the figure  ~\ref{fig:lam}. 
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{plots/ladder system1.png}
+\caption{Three-level system \(\Lambda\) configuration}
+\label{fig:lam}
+\end{figure}
+
+where \(\omega_1\) and \(\omega_2\) are their respective frequencies of the two laser fields. Under appropriate conditions, the atomic population can be transferred between the ground states, effectively behaving like a two-level system \cite{QuantumWorldUltraColdBook2}. 
+
+The full Hamiltonian of the system $H$ is characterized by the atomic Hamiltonian $H_{A}$ and atom\_light interaction Hamiltonian  $H_{int}$. 
+
+\begin{equation}
+    H = H_{A} + H_{int}
+\end{equation}
+
+\begin{equation}
+    H_{A} = -\hbar \omega_{0} |0\rangle\langle 0| -\hbar \omega_{1} |1\rangle\langle 1| 
+\end{equation}
+Where we are taking the energy of excited states as zero.
+Atom\_light interaction Hamiltonian  $H_{int}$ is defined as:
+\begin{equation}
+H_int =  \hbar \left( \Omega_0 e^{i\omega_0 t} |e\rangle \langle 0| + \Omega_1 e^{i\omega_1 t} |e\rangle \langle 1| + \text{h.c.} \right)
+\end{equation}
+
+where \(\Omega_0\) and \(\Omega_1\) are the Rabi frequencies of the two laser fields expressed as follows:
+$$
+\begin{array}{ll}
+\Omega_0=\frac{\vec{d}_{e g_1} \cdot \overrightarrow{\mathcal{E}}_0}{\hbar} & \Omega_1=\frac{\vec{d}_{e g_2} \cdot \overrightarrow{\mathcal{E}}_1}{\hbar} 
+\end{array}
+$$
+
+
+
+Apply Rotating Wave Approximation \(RWA\), where we have the following conditions:
+
+$$ \Omega_0,\; \Omega_1,\; 
+\ll ~\omega_0,\; \omega_1,\; \omega_0+\omega_1,\; |\omega_0-\omega_1|,
+$$
+
+The Hamiltonian in the rotating frame after applying a unitary transformation became:
+\begin{equation}
+H_{eff} = \hbar \begin{pmatrix}
+    0 & \bigg\rvert\dfrac{\Omega_0}{2}\bigg\rvert & 0\\
+    \bigg\rvert\dfrac{\Omega_0}{2}\bigg\rvert & \Delta & \bigg\rvert\dfrac{\Omega_1}{2}\bigg\rvert\\
+    0 & \bigg\rvert\dfrac{\Omega_1}{2}\bigg\rvert & \delta
+\end{pmatrix}
+\end{equation}
+where $\delta_0 \equiv \omega_{eg_0} -\omega_0$, and $\delta_1 \equiv \omega_{eg_1} -\omega_1$.
+$\delta \equiv \delta_0 - \delta_1$ 
+
+
+\subsection{Population Dynamics}
+The time evolution of the population in each state can be described by the density matrix $\rho(t)$, governed by the master equation:
+
+\begin{equation}
+    \frac{d\rho}{dt} = -\frac{i}{\hbar}[H_{\text{eff}}, \rho] + \sum_k \gamma_k \left(  \mathcal{L} \rho  \mathcal{L}^\dagger - \frac{1}{2} \left\{  \mathcal{L}^\dagger  \mathcal{L}, \rho \right\} \right)
+\end{equation}
+    
+
+
+where \(\rho\) is the density matrix, \(H_{eff}\) is the effective  Hamiltonian, $\mathcal{L}$ are the Lindblad operators representing the decay channels, and \(\gamma_k\) are the corresponding decay rates.
+The decay processes from the excited state $|e\rangle$ to the ground states $|0\rangle$ and $|1\rangle$ are characterized by decay rates $\gamma_0$ and $\gamma_1$ respectively. Additionally, there is a decay process to a dark state $|d\rangle$ with decay rate $\gamma_d$.
+For the far-detuned regime, the time-scale energy separation is achieved as follows:
+
+$$\gamma_{0},\; \gamma_{1},\;\gamma_{d},\; \Omega_1,\; \Omega_2,\; \ll ~  |\delta_1|,\; |\delta_2| ~
+\ll ~\omega_1,\; \omega_2,\; \omega_1+\omega_2,\; |\omega_1-\omega_2|,
+$$
+the Hamiltonian simplifies, allowing for effective two-level system formulation. 
+\subsubsection{Dark State}
+
+When the detuning \(\delta = 0\), a dark state emerges in the system. This dark state is a unique quantum state that remains completely decoupled from the driving fields, meaning it has no overlap with the excited state \(|e\rangle\). As a result, the dark state does not undergo any decay. The presence of a dark state is beneficial because it reduces spontaneous emission and helps maintain the coherence of the quantum system \cite{QuantumWorldUltraColdBook2}.
+
+
+
+
+\section{Numerical Simulation}
+
+Simulations were performed to analyze the system’s behavior under various conditions characterized by different decay rates. These decay rates influence the dynamics of the quantum system and are critical for understanding the practical viability of Raman coupling in quantum operations:
+
+\begin{itemize}
+    \item \(\gamma_0\): Decay rate into the state \(|0\rangle\).
+    \item \(\gamma_1\): Decay rate into the state \(|1\rangle\).
+    \item \(\gamma_d\): Decay rate into a dark state \(|d\rangle\), orthogonal to \(|0\rangle\), \(|1\rangle\), and \(|e\rangle\).
+\end{itemize}
+
+\subsection{Simulation Procedure}
+
+For this implementation, we are using \(\hbar = 1\). The code development uses a structural approach dividing the implementation into two classes (\texttt{MESystem} and \texttt{MESystemPlotter}) and helper functions.  The \texttt{MESystem} class is to simulate the evolution of the state vector over time using the master equation approach, while the \texttt{MESystemPlotter} class facilitates the visualization of the results
+
+\subsubsection{MESystem}
+Our approach is based on the master equation, which formalism describes the time evolution of the density matrix \(\rho\). This method allows us to incorporate the effects of decoherence and dissipation. The \texttt{MESystem} class, which includes a method and several attributes for defining and evolving a quantum system.
+The class includes a key method \texttt{evolve\_system(times, rho0=None)} to evolve the system. This method evolves the quantum system over a given array of time points and computes the population dynamics of the states. If no initial density matrix (\texttt{rho0}) is provided, the system assumes an initial population in the state \(\ket{0}\).
+
+The class attributes include:
+
+\begin{itemize}
+    \item \textbf{N}: An integer representing the number of states in the system.
+    \item \textbf{Hfunc}: A function that generates the Hamiltonian of the system for determining the system's energy levels and dynamics.
+    \item \textbf{dets}: A list containing the detunings for the transitions that influence the effective coupling strength between states.
+    \item \textbf{rabi\_freqs}: A list of the Rabi frequencies for the transitions, which determine the rate of oscillations between the states.
+    \item \textbf{c\_ops}: A list of collapse operators, representing the dissipative processes that lead to decoherence and energy loss. 
+    \item \textbf{e\_ops}: A list of expectation operators used for calculating observables.
+\end{itemize}
+
+
+Two additional helper functions support the \texttt{MESystem} class:
+\begin{itemize}
+    \item \texttt{sigma\_ops(N)}: This function generates the basis states for the system. Depending on the number of states \(N\), it returns the appropriate basis kets. The basis states are used for constructing the Hamiltonian and other operators.
+    \item \texttt{ham(N, omega, delta)}: This function constructs the Hamiltonian for simulating the system dynamics. It takes the number of states \(N\), a list of Rabi frequencies (\texttt{omega}), and a list of detunings (\texttt{delta}) as inputs. The Hamiltonian is constructed based on these parameters, representing the interaction and detuning effects. In the far-detuned regime, we expect minimal population in the excited state \(|e\rangle\), and coherent oscillations primarily between the ground states \(|0\rangle\) and \(|1\rangle\) (more details in the result section).
+\end{itemize}
+
+
+
+\subsubsection{MESystemPlotter Class}
+
+The \texttt{MESystemPlotter} class helps visualize the population dynamics of the system. It is used to plot the population dynamics of states over 500 time points in the range  \[ t \in [0, 1000] \]
+
+\section{Results}
+
+The results from these simulations provided valuable insights into the viability of Raman coupling in quantum systems. By analyzing the three specific conditions mentioned, we identified the optimal parameters for achieving coherent oscillations and efficient population transfer in the far-detuned regime at the resonance frequency \(\delta = 0\).
+
+As expected, the excited state \(|e\rangle\) remained minimally populated, allowing for direct coherent oscillations between the ground states \(|0\rangle\) and \(|1\rangle\). The figures illustrate the time evolution of state populations under these different conditions.
+
+
+\subsection{Decay into a Single Level}
+
+
+In Figure~\ref{fig:pop_dyn1}, the decay rates into states \(|0\rangle\) and \(|1\rangle\) are set to \(\gamma_0 = \gamma_1 = 0.3\), with Rabi frequencies \(\omega_0 = \omega_1 = 1.0\) and a detuning value of \(\Delta = 5\). The plot shows a gradual increase in the population of state \(|1\rangle\), along with Rabi oscillations between \(|0\rangle\) and \(|1\rangle\), indicating effective population transfer via the intermediary state \(|e\rangle\). Throughout the evolution, the excited state \(|e\rangle\) remains minimally populated due to the effective decay processes. The observed oscillations between \(|0\rangle\) and \(|1\rangle\) correspond to the effective Rabi frequency, demonstrating that the decay into \(|e\rangle\) does not significantly disrupt the coherent transitions between \(|0\rangle\) and \(|1\rangle\).
+
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/population_dynamics.png}
+    \caption{Population dynamics with decay rates \(\gamma_0 = \gamma_1 = 0.3\), Rabi frequencies \(\omega_0 = \omega_1 = 1.0\), and detuning \(\delta = 0\), \(\Delta = 5.0\).}
+    \label{fig:pop_dyn1}
+\end{figure}
+
+
+
+
+\subsection{Decay into a Dark State}
+
+
+
+Figure~\ref{fig:pop_dyn2} shows the population dynamics when the system decays into a dark state \(|d\rangle\) with a decay rate of \(\gamma_d = 0.5\).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/population_dynamics_dark.png}
+    \caption{Population dynamics decay rate of \(\gamma_d = 0.3\), Rabi frequencies \(\omega_0 = \omega_1 = 1.0\), and detuning \(\delta = 0.0\), \(\Delta = 5.0\).}
+    \label{fig:pop_dyn2}
+\end{figure}
+
+In this case, with \(\gamma_d = 0.5\), \(\delta = 0\), and \(\Delta = 5\), the excited state \(|e\rangle\) gradually decays into the dark state \(|d\rangle\) without any population transfer to the ground states \(|0\rangle\) or \(|1\rangle\). Consequently, the coherent oscillations between \(|0\rangle\) and \(|1\rangle\) diminish over time as the population becomes trapped in the dark state, leading to damped oscillations in these states. As the system evolves, \(|d\rangle\) becomes increasingly populated, effectively suppressing further dynamics and trapping the population in the dark state.
+
+
+\subsection{Decay into Multiple Levels}
+
+In Figure~\ref{fig:pop_dyn3}, the decay rates are set to \(\gamma_0 = 0.3\), \(\gamma_1 = 0.3\), and \(\gamma_d = 0.3\). The Rabi frequencies are \(\omega_0 = 1.0\) and \(\omega_1 = 1.0\), with detuning values \(\delta = 0\) and \(\Delta = 5\). The plot illustrates the combined effect of decay into \(|0\rangle\), \(|1\rangle\), and \(|d\rangle\), showing populations in all these states increasing over time with significant damping of oscillations.
+
+When dissipation includes decay into all states, the population of the excited state \(|e\rangle\) decreases as it decays into the ground states \(|0\rangle\) and \(|1\rangle\), as well as the dark state \(|d\rangle\). This results in a distribution of the population across these states, with the coherent oscillations between \(|0\rangle\) and \(|1\rangle\) potentially damped due to the concurrent decay into \(|d\rangle\). Over time, \(|d\rangle\) becomes increasingly populated, leading to a gradual reduction in the populations of \(|0\rangle\) and \(|1\rangle\) and the suppression of further coherent dynamics in the system.
+
+
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/population_dynamics_all.png}
+    \caption{Population dynamics with decay rates \(\gamma_0 = 0.3\), \(\gamma_1 = 0.3\), \(\gamma_d = 0.3\), Rabi frequencies \(\omega_0 = 1.0\), \(\omega_1 = 1.0\), and detuning \(\delta = 0\), \(\Delta = 5.0\).}
+    \label{fig:pop_dyn3}
+\end{figure}
+
+
+
+\subsection{Effect of Decay Rates}
+To study the effect of different decay rates on the population dynamics, we varied \(\gamma_0\) and \(\gamma_1\) while keeping \(\gamma_d\), Rabi frequencies, and detuning values constant.
+
+In the first set of simulations, shown in Figure \ref{fig:no_dark_state}, where the dark state \(|d\rangle\) is absent, the system maintains strong and sustained oscillations between \(|0\rangle\) and \(|1\rangle\) when both \(\gamma_0 = 0\) and \(\gamma_1 = 0\). Introducing a non-zero decay rate into either \(|0\rangle\) or \(|1\rangle\) (e.g., \(\gamma_{0} = 0.5\), \(\gamma_{1} = 0\)) results in damped oscillations, with the population gradually stabilizing in the state with the non-zero decay rate. However, the population difference between \(|0\rangle\) and \(|1\rangle\) remains relatively small, suggesting that coherent dynamics continue to dominate. When both decay rates are equal and large (\(\gamma_{0} = 1\), \(\gamma_{1} = 1\)), the system quickly reaches a steady state where both ground states share the population equally. Overall, without the dark state, the system exhibits stronger oscillations and more balanced final populations, especially when the decay rates are equal.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\textwidth]{plots/population_dynamics1.png}
+    \caption{Population dynamics with varying decay rates \(\gamma_{0}\) and \(\gamma_{1}\) without the dark state \(|d\rangle\).}
+    \label{fig:no_dark_state}
+\end{figure}
+
+In the second set of simulations, shown in Figure \ref{fig:dark_state}, where the dark state \(|d\rangle\) is included, we explored the population dynamics under various combinations of decay rates \(\gamma_{0}\) (decay from the excited state \(|e\rangle\) to the ground state \(|0\rangle\)) and \(\gamma_{1}\) (decay from \(|e\rangle\) to \(|1\rangle\)). When both decay rates \(\gamma_{0} = 0\) and \(\gamma_{1} = 0\) are zero, the system exhibits sustained oscillations between \(|0\rangle\) and \(|1\rangle\), with the dark state gradually capturing a portion of the population, while \(|e\rangle\) remains minimally populated. As \(\gamma_{0}\) or \(\gamma_{1}\) increases (e.g., \(\gamma_{0} = 0.5\), \(\gamma_{1} = 0\)), the oscillations begin to dampen, with the population of the ground state associated with the non-zero decay rate gradually increasing, although the final populations of \(|0\rangle\) and \(|1\rangle\) remain relatively similar. When both decay rates are equal and large (\(\gamma_{0} = 1\), \(\gamma_{1} = 1\)), the oscillations between \(|0\rangle\) and \(|1\rangle\) are significantly damped, and the dark state captures a considerable portion of the population, resulting in nearly equal populations of \(|0\rangle\) and \(|1\rangle\).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.75\textwidth]{plots/population_dynamics2.png}
+    \caption{Population dynamics with varying decay rates \(\gamma_{0}\) and \(\gamma_{1}\) including the dark state \(|d\rangle\).}
+    \label{fig:dark_state}
+\end{figure}
+
+The amplitude and frequency of these oscillations are influenced by the Rabi frequencies and detuning values. As expected, higher decay rates lead to faster damping of the Rabi oscillations. This is consistent with the theoretical prediction that increased decoherence (due to higher decay rates) diminishes the coherence of the quantum states, thereby reducing the amplitude and duration of Rabi oscillations.
+
+
+
+\subsection{Effect of Detuning Values}
+
+
+The goal of this study was to explore how the system's population dynamics—particularly the coherent oscillations between the ground states \(|0\rangle\) and \(|1\rangle\)—are affected by different combinations of two-photon detuning (\(\delta\)) and single-photon detuning (\(\Delta\)). As shown in Figure~\ref{fig:delta_Delta_variation}, we focused on how the population is distributed among the states \(|0\rangle\), \(|1\rangle\), and the intermediate state \(|d\rangle\).
+
+When the two-photon detuning is small, such as \(\delta = 0.001\), the system is close to resonance, which means the coupling between \(|0\rangle\) and \(|1\rangle\) is very efficient. In this state, oscillations between the ground states can last a long time, especially when \(\Delta\), the single-photon detuning, is large. However, if \(\Delta\) is small (like \(\Delta = 1\)), the system quickly loses coherence. This happens because the weak coupling to the intermediate state causes the population to transfer rapidly into \(|d\rangle\), leaving very little population in \(|0\rangle\) and \(|1\rangle\) to oscillate. But as \(\Delta\) increases (\(\Delta = 3\) or \(\Delta = 10\)), the system behaves differently. The larger \(\Delta\) helps to maintain stronger oscillations because it reduces the amount of population flowing into \(|d\rangle\). This isolates the ground states, allowing them to "talk" to each other for longer, which aligns with what we’d expect from theory.
+
+When we increase the two-photon detuning to \(\delta = 1\), the system starts to move further away from resonance, and things start to change. The coherent coupling between \(|0\rangle\) and \(|1\rangle\) weakens, and we begin to see more damping—that is, the oscillations between the states start to fade. If \(\Delta\) is small (\(\Delta = 1\)), the population transfers quickly to \(|d\rangle\), and the oscillations die out rapidly. This happens because the larger \(\delta\) creates a mismatch between the phases of \(|0\rangle\) and \(|1\rangle\), making it harder for the system to stay coherent. Even when \(\Delta\) is larger (\(\Delta = 10\)), the oscillations initially appear but are quickly damped out as the population steadily shifts toward \(|d\rangle\). In this case, even though \(\Delta\) helps slow the loss of coherence, the larger \(\delta\) value disrupts the energy exchange between \(|0\rangle\) and \(|1\rangle\), so the oscillations don’t last.
+
+At even larger two-photon detuning (\(\delta = 5\)), the system moves into a regime where oscillations are almost completely suppressed. The large phase mismatch introduced by \(\delta\) effectively "disconnects" the ground states from each other, leading to a rapid stabilization of the population in \(|d\rangle\). No matter what the value of \(\Delta\) is, the population quickly settles into \(|d\rangle\) with very little oscillatory behavior between \(|0\rangle\) and \(|1\rangle\). At this point, the system has lost all coherence, and the two ground states are no longer exchanging population meaningfully.
+
+In summary, the behavior we observed fits well with the theoretical models for three-level quantum systems. When \(\delta\) is small, the system stays near resonance, which allows the ground states to oscillate coherently. But as \(\delta\) increases, the system drifts further from resonance, and the coherence between \(|0\rangle\) and \(|1\rangle\) is gradually lost. The single-photon detuning \(\Delta\) plays an important role here too—larger values of \(\Delta\) help the system maintain coherence for longer, but only up to a point. Once \(\delta\) gets large enough, even large \(\Delta\) can’t stop the system from rapidly stabilizing in the intermediate state. Essentially, the system’s behavior is a balancing act between \(\delta\) and \(\Delta\), with the two-photon detuning having the strongest influence on whether the system stays in a coherent, oscillating state or quickly stabilizes.
+
+
+
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/population_dynamics_detuning.png}
+    \caption{Population dynamics with varying detuning values.}
+    \label{fig:delta_Delta_variation}
+\end{figure}
+
+
+
+
+
+\section{Evaluation of the Implementation}
+
+The implementation of the quantum mechanical system using the \texttt{MESystem} and \texttt{MESystemPlotter} classes demonstrates a high level of flexibility, numerical stability, and correctness. The class-based design allows for easy modification and extension, making the system adaptable to various quantum dynamics scenarios. Key features of the implementation include:
+
+\begin{itemize}
+    \item \textbf{Flexibility}: The design supports adjustments to parameters such as the number of states, Hamiltonian function, detuning values, and decay rates without requiring changes to the core structure. This adaptability is crucial for exploring different quantum dynamics scenarios.
+    
+    \item \textbf{Numerical Stability}: Utilizing the \texttt{qutip.mesolve} function ensures reliable and stable numerical methods for system evolution. This contributes to the robustness of the simulation results, even under varying conditions or over extended time periods. The consistent results across different parameter sets confirm the stability of the implementation.
+    
+    \item \textbf{Correctness}: The modular structure of the code, with separate dynamics and plotting functions, facilitates focused testing and minimizes the risk of errors. The results obtained align well with theoretical expectations, verifying the correctness of the approach. This modularity enhances the reliability of the implementation for simulating and analyzing quantum systems.
+\end{itemize}
+
+Overall, the implementation provides a powerful and flexible tool for quantum dynamics research, offering accurate and stable results for various parameter configurations.
+
+\section{Conclusion}
+
+The population dynamics of a three-level quantum system were analyzed under varying detuning and decay rates. Key findings include:
+
+\begin{itemize}
+    \item \textbf{Near Resonance ($\delta = 0$)}: Coherent oscillations between the ground states $|0\rangle$ and $|1\rangle$ are sustained when decay rates are balanced and no dark state is involved. The introduction of a dark state leads to population trapping, which results in the dampening of these oscillations over time.
+    
+    \item \textbf{Increasing Detuning ($\delta$ and $\Delta$)}: As detuning parameters increase, the system rapidly loses coherence. While small $\delta$ values allow for initial oscillations, larger $\delta$ and $\Delta$ drive the system away from resonance, causing a quick stabilization of the population in $|1\rangle$ with minimal oscillatory behavior.
+\end{itemize}
+
+Overall, the system's ability to maintain coherence is strongly influenced by detuning and decay rates. Near-resonant conditions favor sustained dynamics, while larger detuning and the presence of a dark state lead to rapid damping and stabilization. These findings underscore the critical role of detuning and decay in controlling the behavior of quantum systems.
+
+
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+
+\end{document}
